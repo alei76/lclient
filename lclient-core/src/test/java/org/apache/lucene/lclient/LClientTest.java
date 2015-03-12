@@ -12,7 +12,6 @@ import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.store.LockObtainFailedException;
-
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -200,6 +199,7 @@ public class LClientTest {
 
       try (LConnection connA = new LConnection(dataPath + sep + dbName)) {
         try {
+          @SuppressWarnings("unused")
           LCommand cmdA = new LCommand(connA, collName, schema);
           fail("Should not get here");
         } catch (Exception e) {

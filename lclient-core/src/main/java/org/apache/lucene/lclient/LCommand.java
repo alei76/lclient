@@ -1,6 +1,5 @@
 package org.apache.lucene.lclient;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +13,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.CachingWrapperFilter;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.FilteredQuery;
@@ -51,6 +51,8 @@ public class LCommand {
 
   private Map<String,UninvertingReader.Type> mapping = Maps.newHashMap();
 
+  private static final int MAX_LIMIT = 100_0000;
+
   public LCommand(LConnection connection, String collectionName, LSchema schema) throws IOException {
     this.connection = Preconditions.checkNotNull(connection);
     this.name = Preconditions.checkNotNull(collectionName);
@@ -62,6 +64,8 @@ public class LCommand {
     mapping.put(schema.getUniqueKey(), UninvertingReader.Type.SORTED);
 
     fresh();
+
+    BooleanQuery.setMaxClauseCount(MAX_LIMIT);
   }
 
   public void commit() throws IOException {
@@ -134,18 +138,26 @@ public class LCommand {
     return Arrays.stream(results.scoreDocs).map(scoreDoc -> getDoc(scoreDoc, fields));
   }
 
-  public Stream<Document> Join(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
+  public Iterable<Document> JoinFrom(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
+    Query joinQuery = joinQuery(fromCommand, fromField, toField, fromQuery, fromFilterQuery);
+    Filter joinFilter = new QueryWrapperFilter(joinQuery);
+    TopFieldDocs results = search(query, filterQuery, joinFilter, limit, sort);
+    Iterable<ScoreDoc> docIds = Lists.newArrayList(Arrays.asList(results.scoreDocs));
+    return docs(docIds, fields);
+  }
+
+  public Stream<Document> join(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
     Query joinQuery = joinQuery(fromCommand, fromField, toField, fromQuery, fromFilterQuery);
     Filter joinFilter = new QueryWrapperFilter(joinQuery);
     TopFieldDocs results = search(query, filterQuery, joinFilter, limit, sort);
     return Arrays.stream(results.scoreDocs).map(scoreDoc -> getDoc(scoreDoc, fields));
   }
 
-  IndexSearcher searcher() throws IOException {
+  IndexSearcher searcher() {
     return searcher;
   }
 
-  public LSchema schema() throws IOException {
+  public LSchema schema() {
     return schema;
   }
 
@@ -216,7 +228,7 @@ public class LCommand {
   }
 
   private Integer limit(Integer limit) {
-    return MoreObjects.firstNonNull(limit, 100_0000);
+    return MoreObjects.firstNonNull(limit, MAX_LIMIT);
   }
 
   private Sort sort(String sortFieldOrders) {

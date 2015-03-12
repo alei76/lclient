@@ -33,6 +33,7 @@ public class QueryPredicate implements com.google.common.base.Predicate<CharSequ
   public QueryPredicate withQuery(String query) {
     StandardQueryParser parser = new StandardQueryParser();
     parser.setAnalyzer(analyzer);
+    // TODO: NumericConfig
     try {
       this.query = parser.parse(query, DF);
     } catch (QueryNodeException e) { /* ignore */ }
