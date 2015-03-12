@@ -37,8 +37,8 @@ public class LClientTestUtils {
      return schema;
    }
 
-   public static IndexConsumer getIndexConsumer(LCommand coll) {
-     return new IndexConsumer(coll);
+   public static IndexConsumer getIndexConsumer(LCommand cmd) {
+     return new IndexConsumer(cmd);
    }
 
    private static class IndexConsumer implements IntConsumer {
