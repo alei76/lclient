@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class IT001Test {
+public class MeasureTest {
 
   private static final String sep = StandardSystemProperty.FILE_SEPARATOR.value();
   private String dataPath;
@@ -37,7 +37,7 @@ public class IT001Test {
   @Before
   public void setUp() {
     String root = getClass().getResource("/").getFile();
-    this.dataPath = root + sep + "IT001Test" + sep + "data";
+    this.dataPath = root + sep + "MeasureTest" + sep + "data";
 
     this.schema = LClientTestUtils.getLSchema();
   }
