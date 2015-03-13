@@ -79,7 +79,9 @@ public class LDocument {
       fdv = new SortedDocValuesField(name, new BytesRef(value.toString()));
     }
     doc.add(Preconditions.checkNotNull(f));
-    doc.add(Preconditions.checkNotNull(fdv));
+    if (!name.equals(schema.getUniqueKey())) {
+      doc.add(Preconditions.checkNotNull(fdv));
+    }
     return this;
   }
 

@@ -2,16 +2,15 @@ package org.apache.lucene.lclient;
 
 import java.io.IOException;
 import java.util.Arrays;
-
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.lclient.util.Documents;
+import org.apache.lucene.uninverting.UninvertingReader;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.StandardSystemProperty;
-
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -77,6 +76,8 @@ public class ExampleTest {
           } catch (IOException e) { }
         });
       cmd.refresh();
+      // cache of uniqueKey.
+      System.out.println(Joiner.on(",").join(UninvertingReader.getUninvertedStats()));
 
       assertThat(cmd.count("*:*"), is(3));
       assertThat(cmd.count("name:db"), is(1));
