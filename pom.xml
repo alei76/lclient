@@ -16,6 +16,7 @@
   <modules>
     <module>lclient-parent</module>
     <module>lclient-core</module>
+    <module>lclient-tika</module>
   </modules>
 
 </project>
