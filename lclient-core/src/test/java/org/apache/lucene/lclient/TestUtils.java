@@ -14,9 +14,9 @@ import org.apache.lucene.util.TestUtil;
 import com.google.common.base.Splitter;
 import com.google.common.base.Stopwatch;
 
-public class LClientTestUtils {
+public class TestUtils {
 
-   private LClientTestUtils() { }
+   private TestUtils() { }
 
    public static LSchema getLSchema() {
      LSchema schema = LSchema.Builder()

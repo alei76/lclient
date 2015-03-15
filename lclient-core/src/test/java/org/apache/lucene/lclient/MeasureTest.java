@@ -39,7 +39,7 @@ public class MeasureTest {
     String root = getClass().getResource("/").getFile();
     this.dataPath = root + sep + "MeasureTest" + sep + "data";
 
-    this.schema = LClientTestUtils.getLSchema();
+    this.schema = TestUtils.getLSchema();
   }
 
   @Test
@@ -53,7 +53,7 @@ public class MeasureTest {
         System.out.println("cmd:"+stopwatch);
 
         stopwatch = Stopwatch.createStarted();
-    IntStream.range(0, DOC_SIZE).parallel().forEach(LClientTestUtils.getIndexConsumer(cmd));
+    IntStream.range(0, DOC_SIZE).parallel().forEach(TestUtils.getIndexConsumer(cmd));
         System.out.println("indexing:"+stopwatch);
         stopwatch = Stopwatch.createStarted();
     cmd.refresh();

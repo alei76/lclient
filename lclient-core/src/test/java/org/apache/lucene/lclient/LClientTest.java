@@ -37,7 +37,7 @@ public class LClientTest {
     String root = getClass().getResource("/").getFile();
     this.dataPath = root + sep + "LClientTest" + sep + "data";
 
-    this.schema = LClientTestUtils.getLSchema();
+    this.schema = TestUtils.getLSchema();
   }
 
   @Test

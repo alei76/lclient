@@ -29,7 +29,7 @@ public class JoinTest {
   @Before
   public void setUp() {
     String root = getClass().getResource("/").getFile();
-    this.dataPath = root + sep + "IT003Test" + sep + "data";
+    this.dataPath = root + sep + "JoinTest" + sep + "data";
 
     this.customerHSchema = LSchema.Builder()
           .setUniqueKey("id")
