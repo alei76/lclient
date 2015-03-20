@@ -30,7 +30,7 @@ public class MeasureTest {
   private static final String sep = StandardSystemProperty.FILE_SEPARATOR.value();
   private String dataPath;
 
-  private static final int DOC_SIZE = 1_000;
+  private static final int DOC_SIZE = 1_0000;
 
   private LSchema schema;
 

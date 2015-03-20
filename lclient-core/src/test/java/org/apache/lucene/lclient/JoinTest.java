@@ -74,7 +74,7 @@ public class JoinTest {
       // select H.* from H inner join D on D.Hid = H.id where D.item = book
       List<String> resultList =
       new LQuery(cmdH)
-      .join(cmdD).fromField("Hid").toField("id").fromFilter("item:book")
+      .join(cmdD, "Hid").toField("id").fromFilter("item:book")
       .toStream().map(doc -> doc.getField("customer").stringValue())
       .collect(Collectors.toList());
       assertThat(Joiner.on(",").skipNulls().join(resultList), is("Apache,Java"));
@@ -82,7 +82,7 @@ public class JoinTest {
       // select D.* from D inner join H on H.id = D.Hid where H.customer = google
       long result = 
       new LQuery(cmdD)
-      .join(cmdH).fromField("id").toField("Hid").fromFilter("customer:google")
+      .join(cmdH, "id").toField("Hid").fromFilter("customer:google")
       .toStream()
       .count();
       assertThat(result, is(2L));

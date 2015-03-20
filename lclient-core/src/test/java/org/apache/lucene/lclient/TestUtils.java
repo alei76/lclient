@@ -65,8 +65,8 @@ public class TestUtils {
                           +" "+TestUtil.randomSimpleString(ThreadLocalRandom.current()));
         cmd.update(doc);
         if (value % 1000 == 0) {
-           cmd.refresh();
-           System.out.println("refreshing at "+value+":"+stopwatch);
+           cmd.commit();;
+           System.out.println("committing at "+value+":"+stopwatch);
            stopwatch = Stopwatch.createStarted();
         }
       } catch (IOException e) { }

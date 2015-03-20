@@ -1,4 +1,5 @@
 package org.apache.lucene.lclient;
+
 import java.io.IOException;
 import java.util.stream.IntStream;
 import org.junit.Before;

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.lucene.document.Document;
@@ -24,12 +25,14 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopFieldDocs;
+import org.apache.lucene.search.grouping.GroupingSearch;
+import org.apache.lucene.search.grouping.TopGroups;
 import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.uninverting.UninvertingReader;
+import org.apache.lucene.util.BytesRef;
 
-import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -128,9 +131,8 @@ public class LCommand {
   }
 
   public Iterable<Document> find(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
-    TopFieldDocs results = search(query, filterQuery, null, limit, sort);
-    Iterable<ScoreDoc> docIds = Lists.newArrayList(Arrays.asList(results.scoreDocs));
-    return docs(docIds, fields);
+    return stream(query, filterQuery, limit, sort, fields)
+           .collect(Collectors.toList());
   }
 
   public Stream<Document> stream(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
@@ -139,11 +141,8 @@ public class LCommand {
   }
 
   public Iterable<Document> JoinFrom(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
-    Query joinQuery = joinQuery(fromCommand, fromField, toField, fromQuery, fromFilterQuery);
-    Filter joinFilter = new QueryWrapperFilter(joinQuery);
-    TopFieldDocs results = search(query, filterQuery, joinFilter, limit, sort);
-    Iterable<ScoreDoc> docIds = Lists.newArrayList(Arrays.asList(results.scoreDocs));
-    return docs(docIds, fields);
+    return join(query, filterQuery, limit, sort, fields, fromCommand, fromField, toField, fromQuery, fromFilterQuery)
+           .collect(Collectors.toList());
   }
 
   public Stream<Document> join(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
@@ -153,21 +152,40 @@ public class LCommand {
     return Arrays.stream(results.scoreDocs).map(scoreDoc -> getDoc(scoreDoc, fields));
   }
 
+  public Iterable<String> groupingField(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {
+    return grouping(groupField, groupFieldSort, query, filterQuery)
+           .collect(Collectors.toList());
+  }
+
+  public Stream<String> grouping(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {
+    TopGroups<BytesRef> result = groupingSearch(groupField, groupFieldSort, query, filterQuery);
+    return Arrays.stream(result.groups).map(group -> group.groupValue.utf8ToString());
+  }
+
+  private TopGroups<BytesRef> groupingSearch(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {
+    GroupingSearch groupingSearch = new GroupingSearch(groupField);
+    groupingSearch.setAllGroupHeads(false);
+    groupingSearch.setAllGroups(false);
+    groupingSearch.setCaching(MAX_LIMIT, /* cacheScores */ false);
+    groupingSearch.setFillSortFields(false);
+    groupingSearch.setGroupDocsLimit(1);
+    groupingSearch.setGroupDocsOffset(0);
+    String gSort = MoreObjects.firstNonNull(groupFieldSort, groupField + " asc");
+    groupingSearch.setGroupSort(sort(gSort));
+    groupingSearch.setIncludeMaxScore(false);
+    groupingSearch.setIncludeScores(false);
+    String sortWithinGroup = null;
+    String sortWG = MoreObjects.firstNonNull(sortWithinGroup, schema.getUniqueKey() + " asc");
+    groupingSearch.setSortWithinGroup(sort(sortWG));
+    return groupingSearch.search(searcher, filteredQuery(query, filterQuery), 0, MAX_LIMIT);
+  }
+
   IndexSearcher searcher() {
     return searcher;
   }
 
   public LSchema schema() {
     return schema;
-  }
-
-  private Iterable<Document> docs(Iterable<ScoreDoc> docIds, String fields) {
-    Iterable<Document> docs = Iterables.transform(docIds, new Function<ScoreDoc,Document>(){
-      @Override public Document apply(ScoreDoc scoreDoc) {
-        return getDoc(scoreDoc, fields);
-      }
-    });
-    return docs;
   }
 
   private Document getDoc(ScoreDoc scoreDoc, String fields) {

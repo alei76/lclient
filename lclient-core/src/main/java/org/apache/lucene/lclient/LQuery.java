@@ -2,6 +2,7 @@ package org.apache.lucene.lclient;
 
 import java.io.IOException;
 import java.util.stream.Stream;
+
 import org.apache.lucene.document.Document;
 
 import com.google.common.base.Preconditions;
@@ -52,12 +53,8 @@ public class LQuery {
     return this;
   }
 
-  public LQuery join(LCommand fromCommand) {
+  public LQuery join(LCommand fromCommand, String fromField) {
     this.fromCommand = fromCommand;
-    return this;
-  }
-
-  public LQuery fromField(String fromField) {
     this.fromField = fromField;
     return this;
   }
@@ -79,10 +76,10 @@ public class LQuery {
 
   public Iterable<Document> toIterable() throws IOException {
     Preconditions.checkNotNull(command);
-    if (fromCommand == null) {
-      return command.find(query, filterQuery, limit, sort, fields);
-    } else {
+    if ((fromCommand != null) && (fromField != null)) {
       return command.JoinFrom(query, filterQuery, limit, sort, fields, fromCommand, fromField, toField, fromQuery, fromFilterQuery);
+    } else {
+      return command.find(query, filterQuery, limit, sort, fields);
     }
   }
 
@@ -92,10 +89,10 @@ public class LQuery {
 
   public Stream<Document> toStream() throws IOException {
     Preconditions.checkNotNull(command);
-    if (fromCommand == null) {
-      return command.stream(query, filterQuery, limit, sort, fields);
-    } else {
+    if ((fromCommand != null) && (fromField != null)) {
       return command.join(query, filterQuery, limit, sort, fields, fromCommand, fromField, toField, fromQuery, fromFilterQuery);
+    } else {
+      return command.stream(query, filterQuery, limit, sort, fields);
     }
   }
 
