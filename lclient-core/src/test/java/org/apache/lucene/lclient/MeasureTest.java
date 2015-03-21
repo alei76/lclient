@@ -270,4 +270,23 @@ public class MeasureTest {
     System.out.println("elapsed:"+stopwatch);
   }
 
+  @Test
+  public void test005() throws IOException {
+    System.out.println("---------- Grouping test ----------");
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+    LConnection conn = new LConnection(dataPath + sep + "db");
+    LCommand cmd = new LCommand(conn, "coll", schema);
+
+       Stopwatch stopwatch1 = Stopwatch.createStarted();
+    cmd.grouping("id", "id asc", "*:*", "*:*");
+       System.out.println("group by id:"+stopwatch1);
+
+       Stopwatch stopwatch2 = Stopwatch.createStarted();
+    cmd.grouping("tag", "tag asc", "*:*", "*:*");
+       System.out.println("group by tag:"+stopwatch2);
+
+    System.out.println("elapsed:"+stopwatch);
+  }
+
 }

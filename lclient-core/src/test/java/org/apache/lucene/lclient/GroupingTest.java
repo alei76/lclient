@@ -1,6 +1,8 @@
 package org.apache.lucene.lclient;
 
 import java.io.IOException;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -9,6 +11,7 @@ import org.junit.runners.MethodSorters;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.StandardSystemProperty;
+
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -54,20 +57,20 @@ public class GroupingTest {
     cmd.update(new LDocument(schema).append("id", "06").append("price", 0.60).append("code", "A02"));
     cmd.refresh();
 
-    Iterable<String> result1 = cmd.groupingField("code", null, "*:*", null);
+    List<String> result1 = cmd.groupingField("code", null, "*:*", null);
     assertThat(Joiner.on(",").skipNulls().join(result1), is("A01,A02"));
 
-    Iterable<String> result2 = cmd.groupingField("code", "code desc", null, null);
+    List<String> result2 = cmd.groupingField("code", "code desc", null, null);
     assertThat(Joiner.on(",").skipNulls().join(result2), is("A02,A01"));
 
-    Iterable<String> result3 = cmd.groupingField("id", "id desc", "id:[05 TO 10]", null);
+    List<String> result3 = cmd.groupingField("id", "id desc", "id:[05 TO 10]", null);
     assertThat(Joiner.on(",").skipNulls().join(result3), is("10,09,08,07,06,05"));
 
-    Iterable<String> result4 = cmd.groupingField("id", null, null, "price:[0.10 TO 0.30]");
+    List<String> result4 = cmd.groupingField("id", null, null, "price:[0.10 TO 0.30]");
     assertThat(Joiner.on(",").skipNulls().join(result4), is("01,02,03"));
 
     try {
-      Iterable<String> resultNG = cmd.groupingField("price", null, null, null);
+      List<String> resultNG = cmd.groupingField("price", null, null, null);
       assertThat(Joiner.on(",").skipNulls().join(resultNG), is("0.10,0.20"));
       fail("Should not get here");
     } catch (Exception e) {
