@@ -1,6 +1,7 @@
 package org.apache.lucene.lclient;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,6 @@ import org.apache.lucene.util.BytesRef;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -119,22 +119,22 @@ public class LCommand {
     return results.totalHits;
   }
 
-  public Iterable<Document> find(String query) throws IOException {
+  public List<Document> find(String query) throws IOException {
     return find(query, null, null, null, null);
   }
 
   public Document findOne(String query) throws IOException {
-    Iterable<Document> results = find(query, null, 1, null, null);
-    return Iterables.getFirst((results), null);
+    List<Document> results = find(query, null, 1, null, null);
+    return results.get(0);
   }
 
-  public Iterable<Document> filter(String filterQuery) throws IOException {
+  public List<Document> filter(String filterQuery) throws IOException {
     return find(null, filterQuery, null, null, null);
   }
 
-  public Iterable<Document> find(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
+  public List<Document> find(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
     return stream(query, filterQuery, limit, sort, fields)
-           .collect(Collectors.toList());
+           .collect(Collectors.toCollection(() -> new ArrayList<>()));
   }
 
   public Stream<Document> stream(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
@@ -142,9 +142,9 @@ public class LCommand {
     return Arrays.stream(results.scoreDocs).map(scoreDoc -> getDoc(scoreDoc, fields));
   }
 
-  public Iterable<Document> JoinFrom(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
+  public List<Document> JoinFrom(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
     return join(query, filterQuery, limit, sort, fields, fromCommand, fromField, toField, fromQuery, fromFilterQuery)
-           .collect(Collectors.toList());
+           .collect(Collectors.toCollection(() -> new ArrayList<>()));
   }
 
   public Stream<Document> join(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
@@ -156,7 +156,7 @@ public class LCommand {
 
   public List<String> groupingField(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {
     return grouping(groupField, groupFieldSort, query, filterQuery)
-           .collect(Collectors.toList());
+           .collect(Collectors.toCollection(() -> new ArrayList<>()));
   }
 
   public Stream<String> grouping(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {

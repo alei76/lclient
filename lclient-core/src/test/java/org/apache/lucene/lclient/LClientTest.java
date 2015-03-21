@@ -18,7 +18,6 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import com.google.common.base.StandardSystemProperty;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import static org.junit.Assert.*;
@@ -93,18 +92,18 @@ public class LClientTest {
     try (LConnection conn = new LConnection(dataPath + sep + "db")) {
       LCommand cmd = new LCommand(conn, "coll", schema);
 
-      List<Iterable<Document>> queryAndFilter = Lists.newArrayList();
+      List<List<Document>> queryAndFilter = Lists.newArrayList();
 
-      Iterable<Document> Qdocs = cmd.find("id:1", null, null, null, null);
-      assertThat(Iterables.size(Qdocs), is(1));
+      List<Document> Qdocs = cmd.find("id:1", null, null, null, null);
+      assertThat(Qdocs.size(), is(1));
       queryAndFilter.add(Qdocs);
 
-      Iterable<Document> Fdocs = cmd.find(null, "id:1", null, null, null);
-      assertThat(Iterables.size(Fdocs), is(1));
+      List<Document> Fdocs = cmd.find(null, "id:1", null, null, null);
+      assertThat(Fdocs.size(), is(1));
       queryAndFilter.add(Fdocs);
 
       System.out.println("---------- same values ----------");
-      for (Iterable<Document> entry : queryAndFilter) {
+      for (List<Document> entry : queryAndFilter) {
         for (Document doc : entry) {
           for (IndexableField field : doc.getFields()) {
             System.out.println("name:"+field.name()+" "+"value:"+field.stringValue());
@@ -163,12 +162,12 @@ public class LClientTest {
   public void test007() throws IOException, ParseException {
     try (LConnection conn = new LConnection(dataPath + sep + "db")) {
       LCommand cmd = new LCommand(conn, "coll", schema);
-      Iterable<Document> find = cmd.find("count:[1000 TO 2000]");
-      Iterable<Document> filter = cmd.filter("count:[1000 TO 2000]");
-      assertThat(Iterables.size(find), is(Iterables.size(filter)));
+      List<Document> find = cmd.find("count:[1000 TO 2000]");
+      List<Document> filter = cmd.filter("count:[1000 TO 2000]");
+      assertThat(find.size(), is(filter.size()));
       find = cmd.find("count:[10000 TO 20000]");
       filter = cmd.filter("count:[10000 TO 20000]");
-      assertThat(Iterables.size(find), is(Iterables.size(filter)));
+      assertThat(find.size(), is(filter.size()));
     }
   }
 

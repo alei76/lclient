@@ -14,6 +14,7 @@ import org.apache.lucene.lclient.util.Documents;
 
 import com.google.common.base.Function;
 import com.google.common.base.StandardSystemProperty;
+import com.google.common.collect.FluentIterable;
 import com.google.common.io.Files;
 
 public class FindFiles {
@@ -51,7 +52,7 @@ public class FindFiles {
 
       cmd.removeByQuery("*:*");
 
-      Iterable<String> files = 
+      FluentIterable<String> files = 
         Files.fileTreeTraverser().preOrderTraversal(new File(seed)).filter(Files.isFile())
           .transform(new Function<File,String>(){
             @Override public String apply(File file) {

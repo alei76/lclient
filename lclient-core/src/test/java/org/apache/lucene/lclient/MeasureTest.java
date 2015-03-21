@@ -1,6 +1,7 @@
 package org.apache.lucene.lclient;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.base.StandardSystemProperty;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.FluentIterable;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -30,7 +31,7 @@ public class MeasureTest {
   private static final String sep = StandardSystemProperty.FILE_SEPARATOR.value();
   private String dataPath;
 
-  private static final int DOC_SIZE = 1_0000;
+  private static final int DOC_SIZE = 1_000;
 
   private LSchema schema;
 
@@ -78,14 +79,14 @@ public class MeasureTest {
     LCommand cmd = new LCommand(conn, "coll", schema);
 
         Stopwatch stopwatch = Stopwatch.createStarted();
-    Iterable<Document> docsA = cmd.find("*:*");
+    List<Document> docsA = cmd.find("*:*");
         System.out.println("find():"+stopwatch);
-    assertThat(Iterables.size(docsA), is(DOC_SIZE));
+    assertThat(docsA.size(), is(DOC_SIZE));
 
         stopwatch = Stopwatch.createStarted();
-    Iterable<Document> docsAA = cmd.find("*:*");
+    List<Document> docsAA = cmd.find("*:*");
         System.out.println("find() two:"+stopwatch);
-    assertThat(Iterables.size(docsAA), is(DOC_SIZE));
+    assertThat(docsAA.size(), is(DOC_SIZE));
 
         stopwatch = Stopwatch.createStarted();
     Document docs1 = cmd.findOne("*:*");
@@ -96,23 +97,23 @@ public class MeasureTest {
     }
 
         stopwatch = Stopwatch.createStarted();
-    Iterable<Document> docsB = cmd.filter("*:*");
+    List<Document> docsB = cmd.filter("*:*");
         System.out.println("filter():"+stopwatch);
-    assertThat(Iterables.size(docsB), is(DOC_SIZE));
+    assertThat(docsB.size(), is(DOC_SIZE));
 
         stopwatch = Stopwatch.createStarted();
-    Iterable<Document> docsBB = cmd.filter("*:*");
+    List<Document> docsBB = cmd.filter("*:*");
         System.out.println("filter() two:"+stopwatch);
-    assertThat(Iterables.size(docsBB), is(DOC_SIZE));
+    assertThat(docsBB.size(), is(DOC_SIZE));
 
         stopwatch = Stopwatch.createStarted();
-    Iterable<Document> docsC =
-      new LQuery(cmd).find("*:*").filter("*:*").limit(null).toIterable();
+    List<Document> docsC =
+      new LQuery(cmd).find("*:*").filter("*:*").limit(null).toList();
         System.out.println("LQuery():"+stopwatch);
 
         stopwatch = Stopwatch.createStarted();
-    assertThat(Iterables.size(docsC), is(DOC_SIZE));
-        System.out.println("Iterables.size():"+stopwatch);
+    assertThat(docsC.size(), is(DOC_SIZE));
+        System.out.println("List.size():"+stopwatch);
 
         stopwatch = Stopwatch.createStarted();
     cmd.forceMerge();
@@ -131,14 +132,14 @@ public class MeasureTest {
     LConnection conn = new LConnection(dataPath + sep + "db");
     LCommand cmd = new LCommand(conn, "coll", schema);
 
-    Iterable<Document> docs = new LQuery(cmd)
+    List<Document> docs = new LQuery(cmd)
       .find("*:*")
       .filter("id:345")
       .limit(1)
       .fields("id,count,tag")
-      .toIterable();
+      .toList();
 
-    for (IndexableField field : Iterables.get(docs, 0).getFields()) {
+    for (IndexableField field : docs.get(0).getFields()) {
       System.out.println("name:"+field.name()+" "+"value:"+field.stringValue());
     }
 
@@ -200,10 +201,10 @@ public class MeasureTest {
     LCommand cmd = new LCommand(conn, "coll", schema);
 
         Stopwatch stopwatch1 = Stopwatch.createStarted();
-    Iterable<Document> first = new LQuery(cmd)
+    List<Document> first = new LQuery(cmd)
       .find("*:*")
       .filter("count:[1 TO 800]")
-      .fields("price").toIterable();
+      .fields("price").toList();
     double firstSum = 0d;
     for (Document e : first) {
       firstSum = firstSum + e.getField("price").numericValue().doubleValue();
@@ -211,7 +212,7 @@ public class MeasureTest {
         System.out.println("firstSum1:"+firstSum+" time:"+stopwatch1);
 
         Stopwatch stopwatch2 = Stopwatch.createStarted();
-    Iterable<Double> doubles = new LQuery(cmd)
+    FluentIterable<Double> doubles = new LQuery(cmd)
       .find("*:*")
       .filter("count:[1 TO 800]")
       .fields("price").toFluentIterable()
@@ -233,12 +234,12 @@ public class MeasureTest {
         /*iterator*/new LQuery(cmd) 
                       .find("*:*")
                       .filter("count:[1 TO 800]")
-                      .fields("price").toIterable().iterator(),
+                      .fields("price").toList().iterator(),
         /*size*/ DOC_SIZE,
         /*characteristics*/ Spliterator.SIZED),
-      /*--parallel--*/ true)
+      /*--parallel--*/ false)
       .mapToDouble(doc -> doc.getField("price").numericValue().doubleValue())
-      .sum();
+      .reduce(0, Double::sum);
         System.out.println("secondSum1:"+secondSum1+" time:"+stopwatch3);
 
         Stopwatch stopwatch4 = Stopwatch.createStarted();
@@ -247,10 +248,10 @@ public class MeasureTest {
       new LQuery(cmd) 
         .find("*:*")
         .filter("count:[1 TO 800]")
-        .fields("price").toIterable().spliterator(),
-      /*--parallel--*/ true)
+        .fields("price").toList().spliterator(),
+      /*--parallel--*/ false)
       .mapToDouble(doc -> doc.getField("price").numericValue().doubleValue())
-      .sum();
+      .reduce(0, Double::sum);
         System.out.println("secondSum2:"+secondSum2+" time:"+stopwatch4);
 
         Stopwatch stopwatch5 = Stopwatch.createStarted();
@@ -259,11 +260,24 @@ public class MeasureTest {
         .find("*:*")
         .filter("count:[1 TO 800]")
         .fields("price")
-        .toStream()
-        .parallel()
+        .toList()
+        .stream()
+        //.parallel()
         .mapToDouble(doc -> doc.getField("price").numericValue().doubleValue())
-        .sum();
+        .reduce(0, Double::sum);
         System.out.println("secondSum3:"+secondSum3+" time:"+stopwatch5);
+ 
+        Stopwatch stopwatch6 = Stopwatch.createStarted();
+    double secondSum4 =
+      new LQuery(cmd) 
+        .find("*:*")
+        .filter("count:[1 TO 800]")
+        .fields("price")
+        .toStream()
+        //.parallel()
+        .mapToDouble(doc -> doc.getField("price").numericValue().doubleValue())
+        .reduce(0, Double::sum);
+        System.out.println("secondSum4:"+secondSum4+" time:"+stopwatch6);
 
     conn.close();
 

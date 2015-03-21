@@ -1,6 +1,7 @@
 package org.apache.lucene.lclient;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.lucene.document.Document;
@@ -74,7 +75,7 @@ public class LQuery {
     return this;
   }
 
-  public Iterable<Document> toIterable() throws IOException {
+  public List<Document> toList() throws IOException {
     Preconditions.checkNotNull(command);
     if ((fromCommand != null) && (fromField != null)) {
       return command.JoinFrom(query, filterQuery, limit, sort, fields, fromCommand, fromField, toField, fromQuery, fromFilterQuery);
@@ -84,7 +85,7 @@ public class LQuery {
   }
 
   public FluentIterable<Document> toFluentIterable() throws IOException {
-    return FluentIterable.from(toIterable());
+    return FluentIterable.from(toList());
   }
 
   public Stream<Document> toStream() throws IOException {
