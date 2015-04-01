@@ -32,10 +32,13 @@ import org.apache.lucene.search.grouping.GroupingSearch;
 import org.apache.lucene.search.grouping.TopGroups;
 import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
+import org.apache.lucene.search.vectorhighlight.FastVectorHighlighter;
+import org.apache.lucene.search.vectorhighlight.FieldQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.uninverting.UninvertingReader;
 import org.apache.lucene.util.BytesRef;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -303,6 +306,18 @@ public class LCommand {
     SortField [] sortFieldArray = sortFieldList.toArray(new SortField[sortFieldList.size()]);
     sort.setSort(sortFieldArray);
     return sort;
+  }
+
+  public int firstDocId(String query) throws IOException {
+    TopFieldDocs results = search(filteredQuery(query, null), 1, null);
+    return results.scoreDocs[0].doc;
+  }
+
+  public String highlighting(String query, int docId, String field) throws IOException {
+    FastVectorHighlighter highlighter = new FastVectorHighlighter();
+    FieldQuery fieldQuery  = highlighter.getFieldQuery(query(query));
+    String[] bestFragments = highlighter.getBestFragments(fieldQuery, reader, docId, field, /* fragCharSize */ 100, /* maxNumFragments */ 3);
+    return Joiner.on(" ... ").skipNulls().join(bestFragments);
   }
 
 }

@@ -2,6 +2,7 @@ package org.apache.lucene.demo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.lucene.analysis.NGramAnalyzer;
 import org.apache.lucene.lclient.LCommand;
@@ -15,6 +16,7 @@ import org.apache.lucene.lclient.util.Documents;
 import com.google.common.base.Function;
 import com.google.common.base.StandardSystemProperty;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 
 public class FindFiles {
@@ -74,10 +76,22 @@ public class FindFiles {
       LCommand cmd = new LCommand(conn, collectionName, schema);
 
       String q = query.replace("'", "\"");
+      /*
       new LQuery(cmd).filter(q).sort("id asc").toStream()
         .map(doc -> Documents.toMap(schema, doc))
         .map(doc -> doc.get("id"))
         .forEach(id -> { System.out.println(id); });
+      */
+      new LQuery(cmd).filter(q).sort("id asc").toStream()
+      .map(doc -> {
+        Map<String, String> map = Maps.newHashMap();
+        map.put("id", Documents.toMap(schema, doc).get("id").toString());
+        try {
+          map.put("hl", Documents.highlighting(cmd, schema, q, "text", doc));
+        } catch (IOException e) { }
+        return map;
+      })
+      .forEach(map -> { System.out.println(map.get("id") + " " + map.get("hl")); });
     }
   }
 
