@@ -16,7 +16,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <guava.version>18.0</guava.version>
-    <lucene.version>5.0.0</lucene.version>
+    <lucene.version>5.1.0</lucene.version>
     <commons-io.version>2.4</commons-io.version>
     <slf4j-log4j12.version>1.7.10</slf4j-log4j12.version>
     <junit.version>4.12</junit.version>
@@ -132,12 +132,12 @@
           <links>
             <link>http://docs.oracle.com/javase/8/docs/api/</link>
             <link>http://docs.guava-libraries.googlecode.com/git-history/v18.0/javadoc/</link>
-            <link>http://lucene.apache.org/core/5_0_0/core/</link>
-            <link>http://lucene.apache.org/core/5_0_0/analyzers-common/</link>
-            <link>http://lucene.apache.org/core/5_0_0/join/</link>
-            <link>http://lucene.apache.org/core/5_0_0/memory/</link>
-            <link>http://lucene.apache.org/core/5_0_0/misc/</link>
-            <link>http://lucene.apache.org/core/5_0_0/queryparser/</link>
+            <link>http://lucene.apache.org/core/5_1_0/core/</link>
+            <link>http://lucene.apache.org/core/5_1_0/analyzers-common/</link>
+            <link>http://lucene.apache.org/core/5_1_0/join/</link>
+            <link>http://lucene.apache.org/core/5_1_0/memory/</link>
+            <link>http://lucene.apache.org/core/5_1_0/misc/</link>
+            <link>http://lucene.apache.org/core/5_1_0/queryparser/</link>
           </links>
         </configuration>
       </plugin>

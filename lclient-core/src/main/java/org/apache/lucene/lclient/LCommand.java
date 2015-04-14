@@ -13,12 +13,11 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queries.BooleanFilter;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.CachingWrapperFilter;
+import org.apache.lucene.search.CachingWrapperQuery;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.FilteredQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -212,7 +211,6 @@ public class LCommand {
   private TopFieldDocs search(Query filteredQuery, Integer limit, String sort) throws IOException {
     TopFieldDocs results =
       searcher.search(/*query */                     filteredQuery,
-                      /*filter*/                              null, // LUCENE-6286
                       /*n     */                      limit(limit),
                       /*sort  */                        sort(sort),
                       /*scores*/                              true,
@@ -225,12 +223,12 @@ public class LCommand {
   }
 
   private Query filteredQuery(String query, String filterQuery, Filter filter) {
-    BooleanFilter boolFilter = new BooleanFilter();
-    boolFilter.add(filterQuery(filterQuery), BooleanClause.Occur.MUST);
+    BooleanQuery booleanQuery = new BooleanQuery();
+    booleanQuery.add(filterQuery(filterQuery), BooleanClause.Occur.FILTER);
     if (filter != null) {
-      boolFilter.add(filter, BooleanClause.Occur.MUST);
+      booleanQuery.add(filter, BooleanClause.Occur.FILTER);
     }
-    return new FilteredQuery(query(query), boolFilter);
+    return new FilteredQuery(query(query), new QueryWrapperFilter(booleanQuery));
   }
 
   private Query query(String queryString) {
@@ -245,9 +243,9 @@ public class LCommand {
     return query;
   }
 
-  private Filter filterQuery(String filterQuery) {
+  private Query filterQuery(String filterQuery) {
     Query query = query(filterQuery);
-    return new CachingWrapperFilter(new QueryWrapperFilter(query)); // LUCENE-6303
+    return new CachingWrapperQuery(new QueryWrapperFilter(query));
   }
 
   private Query joinQuery(LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
