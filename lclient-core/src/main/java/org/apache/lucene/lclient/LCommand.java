@@ -127,7 +127,7 @@ public class LCommand {
 
   public Document findOne(String query) throws IOException {
     List<Document> results = find(query, null, 1, null, null);
-    return results.get(0);
+    return results.size() > 0 ? results.get(0) : null;
   }
 
   public List<Document> filter(String filterQuery) throws IOException {

@@ -55,6 +55,19 @@ public class LClientTest {
     LConnection conn = new LConnection(dataPath + sep + "mydb");
     LCommand cmd = new LCommand(conn, "test1", schema);
     assertThat(cmd.count("*:*"), is(0));
+
+    Document doc1 = cmd.findOne("*:*");
+    assertThat(doc1, is(nullValue()));
+    Document doc2 = cmd.findOne("id:not-exist-id");
+    assertThat(doc2, is(nullValue()));
+
+    List<Document> docs1 = cmd.find("*:*");
+    assertThat(docs1, is(notNullValue()));
+    assertThat(docs1.size(), is(0));
+    List<Document> docs2 = cmd.find("id:not-exist-id");
+    assertThat(docs2, is(notNullValue()));
+    assertThat(docs2.size(), is(0));
+
     conn.close();
   }
 
