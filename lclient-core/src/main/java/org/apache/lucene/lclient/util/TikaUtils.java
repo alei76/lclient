@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.TikaInputStream;
@@ -20,7 +21,7 @@ public class TikaUtils {
 
   private TikaUtils() { }
 
-  public static String parseToString(File file) throws IOException, TikaException {
+  public static ImmutablePair<String,Metadata> parseToString(File file) throws IOException, TikaException {
     metadata.add(TikaMetadataKeys.RESOURCE_NAME_KEY, file.getName());
     InputStream stream = TikaInputStream.get(file.toURI().toURL(), metadata);
     metadata.add(HttpHeaders.CONTENT_TYPE, detect(stream, metadata));
@@ -33,8 +34,9 @@ public class TikaUtils {
     return detect(stream, metadata);
   }
 
-  public static String parseToString(InputStream stream, Metadata metadata, int maxLength) throws IOException, TikaException {
-    return tika.parseToString(stream, metadata, maxLength);
+  public static ImmutablePair<String,Metadata> parseToString(InputStream stream, Metadata metadata, int maxLength) throws IOException, TikaException {
+    String s = tika.parseToString(stream, metadata, maxLength);
+    return ImmutablePair.of(s, metadata);
   }
 
   public static String detect(InputStream stream, Metadata metadata) throws IOException {
