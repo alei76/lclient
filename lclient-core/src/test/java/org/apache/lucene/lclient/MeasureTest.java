@@ -35,7 +35,7 @@ public class MeasureTest {
   private static final String sep = StandardSystemProperty.FILE_SEPARATOR.value();
   private String dataPath;
 
-  private static final int DOC_SIZE = 1_00000;
+  private static final int DOC_SIZE = 1_000;
 
   private LSchema schema;
 
@@ -330,7 +330,7 @@ public class MeasureTest {
     ScoreDoc bottom = null;
     while (true) {
       List<ImmutableTriple<ScoreDoc,Document,ScoreDoc>> list =
-        cmd.documentTripleStream(bottom, "*:*", "count:[1 TO 9000]", 1000, "id asc", "id")
+        cmd.documentTripleStream(bottom, "*:*", "count:[1 TO 9000]", 100, "id asc", "id")
            .collect(Collectors.toCollection(() -> new ArrayList<>()));
       int listSize = list.size();
       resultSize = resultSize + listSize;
