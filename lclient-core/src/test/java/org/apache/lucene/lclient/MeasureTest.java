@@ -13,6 +13,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.lclient.util.Documents;
 import org.apache.lucene.lclient.util.QueryPredicate;
 import org.apache.lucene.search.ScoreDoc;
 import org.junit.Before;
@@ -25,6 +26,7 @@ import com.google.common.base.Predicates;
 import com.google.common.base.StandardSystemProperty;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -334,6 +336,11 @@ public class MeasureTest {
     int hits = docs.size();
     System.out.println("elapsed:"+stopwatch);
     System.out.println("hits:"+hits);
+    /*
+    docs.stream()
+      .map(doc -> Documents.toMap(cmd.schema(), doc.right).get("id").toString())
+      .forEach(id -> System.out.println(id));
+    */
 
     System.out.println("---------- Scan test(deep paging) ----------");
     stopwatch = Stopwatch.createStarted();
@@ -344,6 +351,11 @@ public class MeasureTest {
         cmd.documentTripleStream(bottom, "*:*", "count:[1 TO 9000]", 100, "id asc", "id")
            .collect(Collectors.toCollection(() -> new ArrayList<>()));
       int listSize = list.size();
+      /*
+      list.stream()
+        .map(doc -> Documents.toMap(cmd.schema(), doc.middle).get("id").toString())
+        .forEach(id -> System.out.println(id));
+      */
       resultSize = resultSize + listSize;
       if (listSize == 0 || list.get(0).right == null) break;
       bottom = list.get(0).right;
