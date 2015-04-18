@@ -1,11 +1,9 @@
 package org.apache.lucene.lclient.util;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.lclient.LCommand;
 import org.apache.lucene.lclient.LDataType;
 import org.apache.lucene.lclient.LSchema;
 
@@ -43,14 +41,6 @@ public class Documents {
       result.put(key, value);
     }
     return result;
-  }
-
-  public static String highlighting(LCommand command, LSchema schema,
-                                    String query, String field, Document document) throws IOException {
-    String uniqueKeyField = schema.getUniqueKey();
-    String q = uniqueKeyField+":"+"\""+document.getField(uniqueKeyField).stringValue()+"\"";
-    int docId = command.firstDocId(q);
-    return command.highlighting(query, docId, field);
   }
 
 }

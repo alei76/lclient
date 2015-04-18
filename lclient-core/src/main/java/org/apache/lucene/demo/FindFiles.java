@@ -76,18 +76,13 @@ public class FindFiles {
       LCommand cmd = new LCommand(conn, collectionName, schema);
 
       String q = query.replace("'", "\"");
-      /*
-      new LQuery(cmd).filter(q).sort("id asc").toStream()
-        .map(doc -> Documents.toMap(schema, doc))
-        .map(doc -> doc.get("id"))
-        .forEach(id -> { System.out.println(id); });
-      */
-      new LQuery(cmd).filter(q).sort("id asc").toStream()
-      .map(doc -> {
+
+      new LQuery(cmd).filter(q).sort("id asc").toPairStream()
+      .map(pair -> {
         Map<String, String> map = Maps.newHashMap();
-        map.put("id", Documents.toMap(schema, doc).get("id").toString());
+        map.put("id", Documents.toMap(schema, pair.right).get("id").toString());
         try {
-          map.put("hl", Documents.highlighting(cmd, schema, q, "text", doc));
+          map.put("hl", cmd.highlighting(q, pair.left.doc, "text"));
         } catch (IOException e) { }
         return map;
       })

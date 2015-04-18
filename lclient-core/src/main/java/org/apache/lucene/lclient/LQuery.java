@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.search.ScoreDoc;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.FluentIterable;
@@ -94,6 +96,15 @@ public class LQuery {
       return command.join(query, filterQuery, limit, sort, fields, fromCommand, fromField, toField, fromQuery, fromFilterQuery);
     } else {
       return command.stream(query, filterQuery, limit, sort, fields);
+    }
+  }
+
+  public Stream<ImmutablePair<ScoreDoc,Document>> toPairStream() throws IOException {
+    Preconditions.checkNotNull(command);
+    if ((fromCommand != null) && (fromField != null)) {
+      throw new UnsupportedOperationException("currently join not supported");
+    } else {
+      return command.pairStream(query, filterQuery, limit, sort, fields);
     }
   }
 

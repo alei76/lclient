@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
@@ -142,6 +143,12 @@ public class LCommand {
   public Stream<Document> stream(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
     TopFieldDocs results = search(filteredQuery(query, filterQuery), limit, sort);
     return Arrays.stream(results.scoreDocs).map(scoreDoc -> getDoc(scoreDoc, fields));
+  }
+
+  public Stream<ImmutablePair<ScoreDoc,Document>> pairStream(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
+    TopFieldDocs results = search(filteredQuery(query, filterQuery), limit, sort);
+    return Arrays.stream(results.scoreDocs)
+           .map(scoreDoc -> ImmutablePair.of(scoreDoc, getDoc(scoreDoc, fields)));
   }
 
   public List<Document> JoinFrom(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
@@ -306,13 +313,9 @@ public class LCommand {
     return sort;
   }
 
-  public int firstDocId(String query) throws IOException {
-    TopFieldDocs results = search(filteredQuery(query, null), 1, null);
-    return results.scoreDocs[0].doc;
-  }
+  private FastVectorHighlighter highlighter = new FastVectorHighlighter();
 
   public String highlighting(String query, int docId, String field) throws IOException {
-    FastVectorHighlighter highlighter = new FastVectorHighlighter();
     FieldQuery fieldQuery  = highlighter.getFieldQuery(query(query));
     String[] bestFragments = highlighter.getBestFragments(fieldQuery, reader, docId, field, /* fragCharSize */ 100, /* maxNumFragments */ 3);
     return Joiner.on(" ... ").skipNulls().join(bestFragments);
