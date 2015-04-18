@@ -1,6 +1,7 @@
 package org.apache.lucene.lclient;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -8,9 +9,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.lclient.util.QueryPredicate;
+import org.apache.lucene.search.ScoreDoc;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -31,7 +35,7 @@ public class MeasureTest {
   private static final String sep = StandardSystemProperty.FILE_SEPARATOR.value();
   private String dataPath;
 
-  private static final int DOC_SIZE = 1_000;
+  private static final int DOC_SIZE = 1_00000;
 
   private LSchema schema;
 
@@ -300,7 +304,42 @@ public class MeasureTest {
     cmd.groupingStream("tag", "tag asc", "*:*", "*:*");
        System.out.println("group by tag:"+stopwatch2);
 
+    conn.close();
+
     System.out.println("elapsed:"+stopwatch);
   }
 
+  @Test
+  public void test006() throws IOException {
+    System.out.println("---------- Scan test(standard) ----------");
+
+    LConnection conn = new LConnection(dataPath + sep + "db");
+    LCommand cmd = new LCommand(conn, "coll", schema);
+
+       Stopwatch stopwatch1 = Stopwatch.createStarted();
+    List<ImmutablePair<ScoreDoc,Document>> docs =
+      cmd.documentPairStream("*:*", "count:[1 TO 9000]", DOC_SIZE, "id asc", "id")
+         .collect(Collectors.toCollection(() -> new ArrayList<>()));
+    int hits = docs.size();
+       System.out.println("elapsed:"+stopwatch1);
+       System.out.println("hits:"+hits);
+
+    System.out.println("---------- Scan test(deep paging) ----------");
+       Stopwatch stopwatch2 = Stopwatch.createStarted();
+    int resultSize = 0;
+    ScoreDoc bottom = null;
+    while (true) {
+      List<ImmutableTriple<ScoreDoc,Document,ScoreDoc>> list =
+        cmd.documentTripleStream(bottom, "*:*", "count:[1 TO 9000]", 1000, "id asc", "id")
+           .collect(Collectors.toCollection(() -> new ArrayList<>()));
+      int listSize = list.size();
+      resultSize = resultSize + listSize;
+      if (listSize == 0 || list.get(0).right == null) break;
+      bottom = list.get(0).right;
+    }
+       System.out.println("elapsed:"+stopwatch2);
+    assertThat(resultSize, is(hits));
+
+    conn.close();
+  }
 }

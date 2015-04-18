@@ -4,13 +4,17 @@ package org.apache.lucene.lclient;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -68,6 +72,11 @@ public class LClientTest {
     assertThat(docs2, is(notNullValue()));
     assertThat(docs2.size(), is(0));
 
+    List<ImmutablePair<ScoreDoc,Document>> list =
+      cmd.documentPairStream("id:not-exist-id", null, null, null, "id")
+         .collect(Collectors.toCollection(() -> new ArrayList<>()));
+    assertThat(list.size(), is(0));
+ 
     conn.close();
   }
 

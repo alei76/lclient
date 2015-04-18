@@ -81,7 +81,7 @@ public class LConnection implements Closeable {
 
   private Map<String,DirectoryReader> indexReaders = Maps.newHashMap();
 
-  void setIndexReader(String name, DirectoryReader reader) {
+  void putIndexReader(String name, DirectoryReader reader) {
     indexReaders.put(name, reader);
   }
 

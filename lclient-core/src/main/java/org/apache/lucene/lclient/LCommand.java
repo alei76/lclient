@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
@@ -90,7 +91,7 @@ public class LCommand {
     DirectoryReader directoryReader = DirectoryReader.open(directory);
     reader = UninvertingReader.wrap(directoryReader, mapping);
     searcher = new IndexSearcher(reader);
-    connection.setIndexReader(name, reader);
+    connection.putIndexReader(name, reader);
   }
 
   public void refresh() throws IOException {
@@ -98,7 +99,7 @@ public class LCommand {
     if (directoryReader != null) {
       reader = UninvertingReader.wrap(directoryReader, mapping);
       searcher = new IndexSearcher(reader);
-      connection.setIndexReader(name, reader);
+      connection.putIndexReader(name, reader);
     }
   }
 
@@ -149,6 +150,15 @@ public class LCommand {
     TopFieldDocs results = search(filteredQuery(query, filterQuery), limit, sort);
     return Arrays.stream(results.scoreDocs)
            .map(scoreDoc -> ImmutablePair.of(scoreDoc, getDoc(scoreDoc, fields)));
+  }
+
+  public Stream<ImmutableTriple<ScoreDoc,Document,ScoreDoc>> documentTripleStream(ScoreDoc lastbottom, String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
+    TopFieldDocs results = searchAfter(lastbottom, filteredQuery(query, filterQuery), limit, sort);
+    final ScoreDoc resultbottom =
+      (results.scoreDocs.length > 0) ?
+        results.scoreDocs[results.scoreDocs.length - 1] : null;
+    return Arrays.stream(results.scoreDocs)
+           .map(scoreDoc -> ImmutableTriple.of(scoreDoc, getDoc(scoreDoc, fields), resultbottom));
   }
 
   List<Document> JoinFrom(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
@@ -224,6 +234,18 @@ public class LCommand {
   private TopFieldDocs search(Query filteredQuery, Integer limit, String sort) throws IOException {
     TopFieldDocs results =
       searcher.search(/*query */                     filteredQuery,
+                      /*n     */                      limit(limit),
+                      /*sort  */                        sort(sort),
+                      /*scores*/                              true,
+                      /*maxscr*/                             false);
+    return results;
+  }
+
+  private TopFieldDocs searchAfter(ScoreDoc lastBottom, Query filteredQuery, Integer limit, String sort) throws IOException {
+    TopFieldDocs results =
+      searcher.searchAfter(
+                      /*after */                        lastBottom,
+                      /*query */                     filteredQuery,
                       /*n     */                      limit(limit),
                       /*sort  */                        sort(sort),
                       /*scores*/                              true,
