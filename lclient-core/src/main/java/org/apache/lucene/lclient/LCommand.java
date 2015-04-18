@@ -59,7 +59,7 @@ public class LCommand {
 
   private Map<String,UninvertingReader.Type> mapping = Maps.newHashMap();
 
-  private static final int MAX_LIMIT = 100_0000;
+  public static final int MAX_LIMIT = 100_0000;
 
   public LCommand(LConnection connection, String collectionName, LSchema schema) throws IOException {
     this.connection = Preconditions.checkNotNull(connection);
@@ -122,25 +122,25 @@ public class LCommand {
     return results.totalHits;
   }
 
-  public List<Document> find(String query) throws IOException {
+  List<Document> find(String query) throws IOException {
     return find(query, null, null, null, null);
   }
 
-  public Document findOne(String query) throws IOException {
+  Document findOne(String query) throws IOException {
     List<Document> results = find(query, null, 1, null, null);
     return results.size() > 0 ? results.get(0) : null;
   }
 
-  public List<Document> filter(String filterQuery) throws IOException {
+  List<Document> filter(String filterQuery) throws IOException {
     return find(null, filterQuery, null, null, null);
   }
 
-  public List<Document> find(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
-    return stream(query, filterQuery, limit, sort, fields)
+  List<Document> find(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
+    return documentStream(query, filterQuery, limit, sort, fields)
            .collect(Collectors.toCollection(() -> new ArrayList<>()));
   }
 
-  public Stream<Document> stream(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
+  public Stream<Document> documentStream(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
     TopFieldDocs results = search(filteredQuery(query, filterQuery), limit, sort);
     return Arrays.stream(results.scoreDocs).map(scoreDoc -> getDoc(scoreDoc, fields));
   }
@@ -151,24 +151,24 @@ public class LCommand {
            .map(scoreDoc -> ImmutablePair.of(scoreDoc, getDoc(scoreDoc, fields)));
   }
 
-  public List<Document> JoinFrom(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
-    return join(query, filterQuery, limit, sort, fields, fromCommand, fromField, toField, fromQuery, fromFilterQuery)
+  List<Document> JoinFrom(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
+    return joinStream(query, filterQuery, limit, sort, fields, fromCommand, fromField, toField, fromQuery, fromFilterQuery)
            .collect(Collectors.toCollection(() -> new ArrayList<>()));
   }
 
-  public Stream<Document> join(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
+  public Stream<Document> joinStream(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {
     Query joinQuery = joinQuery(fromCommand, fromField, toField, fromQuery, fromFilterQuery);
     Filter joinFilter = new QueryWrapperFilter(joinQuery);
     TopFieldDocs results = search(filteredQuery(query, filterQuery, joinFilter), limit, sort);
     return Arrays.stream(results.scoreDocs).map(scoreDoc -> getDoc(scoreDoc, fields));
   }
 
-  public List<String> groupingField(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {
-    return grouping(groupField, groupFieldSort, query, filterQuery)
+  List<String> groupingField(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {
+    return groupingStream(groupField, groupFieldSort, query, filterQuery)
            .collect(Collectors.toCollection(() -> new ArrayList<>()));
   }
 
-  public Stream<String> grouping(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {
+  public Stream<String> groupingStream(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {
     TopGroups<BytesRef> result = groupingSearch(groupField, groupFieldSort, query, filterQuery);
     return Arrays.stream(result.groups).map(group -> group.groupValue.utf8ToString());
   }

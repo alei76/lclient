@@ -90,12 +90,12 @@ public class LQuery {
     return FluentIterable.from(toList());
   }
 
-  public Stream<Document> toStream() throws IOException {
+  public Stream<Document> toDocumentStream() throws IOException {
     Preconditions.checkNotNull(command);
     if ((fromCommand != null) && (fromField != null)) {
-      return command.join(query, filterQuery, limit, sort, fields, fromCommand, fromField, toField, fromQuery, fromFilterQuery);
+      return command.joinStream(query, filterQuery, limit, sort, fields, fromCommand, fromField, toField, fromQuery, fromFilterQuery);
     } else {
-      return command.stream(query, filterQuery, limit, sort, fields);
+      return command.documentStream(query, filterQuery, limit, sort, fields);
     }
   }
 

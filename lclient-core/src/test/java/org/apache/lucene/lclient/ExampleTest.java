@@ -61,7 +61,7 @@ public class ExampleTest {
       new LQuery(cmd)
         .find("name:lucene")
         .sort("id asc")
-        .toStream()
+        .toDocumentStream()
         .map(doc -> Documents.toMap(cmd.schema(), doc))
         .peek(map -> {
           System.out.println("get a document:");
@@ -90,7 +90,7 @@ public class ExampleTest {
   }
 
   private void print(LCommand cmd) throws IOException {
-    new LQuery(cmd).find("*:*").toStream()
+    new LQuery(cmd).find("*:*").toDocumentStream()
       .map(doc -> Documents.toMap(cmd.schema(), doc))
       .forEach(map -> {
         System.out.println(Joiner.on(",").withKeyValueSeparator("=").join(map));

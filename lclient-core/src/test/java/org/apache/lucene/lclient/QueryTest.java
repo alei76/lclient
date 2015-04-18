@@ -53,7 +53,7 @@ public class QueryTest {
        .limit(5)
        .sort("price desc")
        .fields("id,price")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--price asc--");
@@ -62,7 +62,7 @@ public class QueryTest {
        .limit(5)
        .sort("price asc")
        .fields("id,price")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--star desc--");
@@ -71,7 +71,7 @@ public class QueryTest {
        .limit(5)
        .sort("star desc")
        .fields("id,star")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--star asc--");
@@ -80,7 +80,7 @@ public class QueryTest {
        .limit(5)
        .sort("star asc")
        .fields("id,star")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--count desc--");
@@ -89,7 +89,7 @@ public class QueryTest {
        .limit(5)
        .sort("count desc")
        .fields("id,count")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--count asc--");
@@ -98,7 +98,7 @@ public class QueryTest {
        .limit(5)
        .sort("count asc")
        .fields("id,count")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--long desc--");
@@ -107,7 +107,7 @@ public class QueryTest {
        .limit(5)
        .sort("date desc")
        .fields("id,date")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--long asc--");
@@ -116,7 +116,7 @@ public class QueryTest {
        .limit(5)
        .sort("date asc")
        .fields("id,date")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--tag desc--");
@@ -125,7 +125,7 @@ public class QueryTest {
        .limit(5)
        .sort("tag desc")
        .fields("id,tag")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--tag asc--");
@@ -134,7 +134,7 @@ public class QueryTest {
        .limit(5)
        .sort("tag asc")
        .fields("id,tag")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--text desc--");
@@ -143,7 +143,7 @@ public class QueryTest {
        .limit(5)
        .sort("text desc")
        .fields("id,text")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
 
         System.out.println("--text asc--");
@@ -152,7 +152,7 @@ public class QueryTest {
        .limit(5)
        .sort("text asc,id asc")
        .fields("id,text")
-       .toStream()
+       .toDocumentStream()
        .forEach(doc -> print(doc));
     }
   }
@@ -163,7 +163,7 @@ public class QueryTest {
 
     LCommand cmd = new LCommand(conn, "coll", schema);
       System.out.println("--text asc #2--");
-      cmd.stream("*:*", null, 5, "text asc, id asc", "id, text")
+      cmd.documentStream("*:*", null, 5, "text asc, id asc", "id, text")
       .forEach(doc -> print(doc));
     }
   }

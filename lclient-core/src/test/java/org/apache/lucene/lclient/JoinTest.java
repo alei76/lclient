@@ -75,7 +75,7 @@ public class JoinTest {
       List<String> resultList =
       new LQuery(cmdH)
       .join(cmdD, "Hid").toField("id").fromFilter("item:book")
-      .toStream().map(doc -> doc.getField("customer").stringValue())
+      .toDocumentStream().map(doc -> doc.getField("customer").stringValue())
       .collect(Collectors.toList());
       assertThat(Joiner.on(",").skipNulls().join(resultList), is("Apache,Java"));
 
@@ -83,7 +83,7 @@ public class JoinTest {
       long result = 
       new LQuery(cmdD)
       .join(cmdH, "id").toField("Hid").fromFilter("customer:google")
-      .toStream()
+      .toDocumentStream()
       .count();
       assertThat(result, is(2L));
 

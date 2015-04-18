@@ -178,7 +178,7 @@ public class MeasureTest {
       .filter("id:(345 OR 346)")
       .limit(2)
       .fields("id")
-      .toStream()
+      .toDocumentStream()
       .parallel()
       .map(doc -> doc.getField("id").stringValue())
       .filter(new QueryPredicate("345"))
@@ -273,7 +273,7 @@ public class MeasureTest {
         .find("*:*")
         .filter("count:[1 TO 800]")
         .fields("price")
-        .toStream()
+        .toDocumentStream()
         //.parallel()
         .mapToDouble(doc -> doc.getField("price").numericValue().doubleValue())
         .reduce(0, Double::sum);
@@ -293,11 +293,11 @@ public class MeasureTest {
     LCommand cmd = new LCommand(conn, "coll", schema);
 
        Stopwatch stopwatch1 = Stopwatch.createStarted();
-    cmd.grouping("id", "id asc", "*:*", "*:*");
+    cmd.groupingStream("id", "id asc", "*:*", "*:*");
        System.out.println("group by id:"+stopwatch1);
 
        Stopwatch stopwatch2 = Stopwatch.createStarted();
-    cmd.grouping("tag", "tag asc", "*:*", "*:*");
+    cmd.groupingStream("tag", "tag asc", "*:*", "*:*");
        System.out.println("group by tag:"+stopwatch2);
 
     System.out.println("elapsed:"+stopwatch);
