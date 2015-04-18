@@ -17,6 +17,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <guava.version>18.0</guava.version>
     <lucene.version>5.1.0</lucene.version>
+    <tika.version>1.7</tika.version>
+    <commons-lang3.version>3.4</commons-lang3.version>
     <commons-io.version>2.4</commons-io.version>
     <slf4j-log4j12.version>1.7.10</slf4j-log4j12.version>
     <junit.version>4.12</junit.version>
@@ -74,11 +76,33 @@
       <version>${lucene.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+      <version>${tika.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-parsers</artifactId>
+      <version>${tika.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
+    </dependency>
 <!-- FileUtils.forceDelete()
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${commons-io.version}</version>
+    </dependency>
+-->
+<!-- memo
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>lclient-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
 -->
     <dependency>
@@ -138,6 +162,8 @@
             <link>http://lucene.apache.org/core/5_1_0/memory/</link>
             <link>http://lucene.apache.org/core/5_1_0/misc/</link>
             <link>http://lucene.apache.org/core/5_1_0/queryparser/</link>
+            <link>http://commons.apache.org/proper/commons-lang/javadocs/api-3.4/</link>
+            <link>http://tika.apache.org/1.7/api/</link>
           </links>
         </configuration>
       </plugin>
