@@ -145,7 +145,7 @@ public class LCommand {
     return Arrays.stream(results.scoreDocs).map(scoreDoc -> getDoc(scoreDoc, fields));
   }
 
-  public Stream<ImmutablePair<ScoreDoc,Document>> pairStream(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
+  public Stream<ImmutablePair<ScoreDoc,Document>> documentPairStream(String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
     TopFieldDocs results = search(filteredQuery(query, filterQuery), limit, sort);
     return Arrays.stream(results.scoreDocs)
            .map(scoreDoc -> ImmutablePair.of(scoreDoc, getDoc(scoreDoc, fields)));
@@ -171,6 +171,12 @@ public class LCommand {
   public Stream<String> groupingStream(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {
     TopGroups<BytesRef> result = groupingSearch(groupField, groupFieldSort, query, filterQuery);
     return Arrays.stream(result.groups).map(group -> group.groupValue.utf8ToString());
+  }
+
+  public Stream<ImmutablePair<String,Integer>> groupingPairStream(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {
+    TopGroups<BytesRef> result = groupingSearch(groupField, groupFieldSort, query, filterQuery);
+    return Arrays.stream(result.groups)
+           .map(group -> ImmutablePair.of(group.groupValue.utf8ToString(), group.totalHits));
   }
 
   private TopGroups<BytesRef> groupingSearch(String groupField, String groupFieldSort, String query, String filterQuery) throws IOException {

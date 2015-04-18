@@ -77,7 +77,7 @@ public class FindFiles {
 
       String q = query.replace("'", "\"");
 
-      new LQuery(cmd).filter(q).sort("id asc").toPairStream()
+      new LQuery(cmd).filter(q).sort("id asc").toDocumentPairStream()
       .map(pair -> {
         Map<String, String> map = Maps.newHashMap();
         map.put("id", Documents.toMap(schema, pair.right).get("id").toString());

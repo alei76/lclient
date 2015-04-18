@@ -1,8 +1,10 @@
 package org.apache.lucene.lclient;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -54,7 +56,7 @@ public class GroupingTest {
     cmd.update(new LDocument(schema).append("id", "08").append("price", 0.80).append("code", "A02"));
     cmd.update(new LDocument(schema).append("id", "10").append("price", 1.00).append("code", "A02"));
     cmd.update(new LDocument(schema).append("id", "09").append("price", 0.90).append("code", "A01"));
-    cmd.update(new LDocument(schema).append("id", "06").append("price", 0.60).append("code", "A02"));
+    cmd.update(new LDocument(schema).append("id", "06").append("price", 0.60).append("code", "A01"));
     cmd.refresh();
 
     List<String> result1 = cmd.groupingField("code", null, "*:*", null);
@@ -79,6 +81,21 @@ public class GroupingTest {
       // at org.apache.lucene.search.grouping.term.TermFirstPassGroupingCollector.doSetNextReader(TermFirstPassGroupingCollector.java:92)
     }
 
+    List<ImmutablePair<String, Integer>> r1
+      = cmd.groupingPairStream("code", null, "*:*", null)
+           .collect(Collectors.toCollection(() -> new ArrayList<>()));
+    assertThat(r1.get(0).left, is("A01"));
+    assertThat(r1.get(0).right, is(6));
+    assertThat(r1.get(1).left, is("A02"));
+    assertThat(r1.get(1).right, is(4));
+
+    List<ImmutablePair<String, Integer>> r2
+      = cmd.groupingPairStream("code", "code desc", null, null)
+           .collect(Collectors.toCollection(() -> new ArrayList<>()));
+    assertThat(r2.get(0).left, is("A02"));
+    assertThat(r2.get(0).right, is(4));
+    assertThat(r2.get(1).left, is("A01"));
+    assertThat(r2.get(1).right, is(6));
   }
 
 }

@@ -99,12 +99,12 @@ public class LQuery {
     }
   }
 
-  public Stream<ImmutablePair<ScoreDoc,Document>> toPairStream() throws IOException {
+  public Stream<ImmutablePair<ScoreDoc,Document>> toDocumentPairStream() throws IOException {
     Preconditions.checkNotNull(command);
     if ((fromCommand != null) && (fromField != null)) {
       throw new UnsupportedOperationException("currently join not supported");
     } else {
-      return command.pairStream(query, filterQuery, limit, sort, fields);
+      return command.documentPairStream(query, filterQuery, limit, sort, fields);
     }
   }
 
