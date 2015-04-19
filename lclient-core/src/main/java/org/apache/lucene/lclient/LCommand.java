@@ -152,13 +152,13 @@ public class LCommand {
            .map(scoreDoc -> ImmutablePair.of(scoreDoc, getDoc(scoreDoc, fields)));
   }
 
-  public Stream<ImmutableTriple<ScoreDoc,Document,ScoreDoc>> documentTripleStream(ScoreDoc lastbottom, String query, String filterQuery, Integer limit, String sort, String fields) throws IOException {
-    TopFieldDocs results = searchAfter(lastbottom, filteredQuery(query, filterQuery), limit, sort);
-    final ScoreDoc resultbottom =
+  public Stream<ImmutableTriple<ScoreDoc,Document,ScoreDoc>> documentTripleStream(ScoreDoc lastBottom, String query, String filterQuery, Integer numHits, String sort, String fields) throws IOException {
+    TopFieldDocs results = searchAfter(lastBottom, filteredQuery(query, filterQuery), numHits, sort);
+    final ScoreDoc resultBottom =
       (results.scoreDocs.length > 0) ?
         results.scoreDocs[results.scoreDocs.length - 1] : null;
     return Arrays.stream(results.scoreDocs)
-           .map(scoreDoc -> ImmutableTriple.of(scoreDoc, getDoc(scoreDoc, fields), resultbottom));
+           .map(scoreDoc -> ImmutableTriple.of(scoreDoc, getDoc(scoreDoc, fields), resultBottom));
   }
 
   List<Document> JoinFrom(String query, String filterQuery, Integer limit, String sort, String fields, LCommand fromCommand, String fromField, String toField, String fromQuery, String fromFilterQuery) throws IOException {

@@ -26,7 +26,6 @@ import com.google.common.base.Predicates;
 import com.google.common.base.StandardSystemProperty;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -37,7 +36,7 @@ public class MeasureTest {
   private static final String sep = StandardSystemProperty.FILE_SEPARATOR.value();
   private String dataPath;
 
-  private static final int DOC_SIZE = 1_000;
+  private static final int DOC_SIZE = 1_0000;
 
   private LSchema schema;
 
@@ -331,7 +330,7 @@ public class MeasureTest {
 
     Stopwatch stopwatch = Stopwatch.createStarted();
     List<ImmutablePair<ScoreDoc,Document>> docs =
-      cmd.documentPairStream("*:*", "count:[1 TO 9000]", DOC_SIZE, "id asc", "id")
+      cmd.documentPairStream("*:*", "*:*", null, "id asc", "id")
          .collect(Collectors.toCollection(() -> new ArrayList<>()));
     int hits = docs.size();
     System.out.println("elapsed:"+stopwatch);
@@ -348,9 +347,10 @@ public class MeasureTest {
     ScoreDoc bottom = null;
     while (true) {
       List<ImmutableTriple<ScoreDoc,Document,ScoreDoc>> list =
-        cmd.documentTripleStream(bottom, "*:*", "count:[1 TO 9000]", 100, "id asc", "id")
+        cmd.documentTripleStream(bottom, "*:*", "*:*", 100, "id asc", "id")
            .collect(Collectors.toCollection(() -> new ArrayList<>()));
       int listSize = list.size();
+      System.out.println("inside while:"+stopwatch);
       /*
       list.stream()
         .map(doc -> Documents.toMap(cmd.schema(), doc.middle).get("id").toString())
