@@ -347,7 +347,7 @@ public class MeasureTest {
     ScoreDoc bottom = null;
     while (true) {
       List<ImmutableTriple<ScoreDoc,Document,ScoreDoc>> list =
-        cmd.documentTripleStream(bottom, "*:*", "*:*", 100, "id asc", "id")
+        cmd.documentTripleStream(bottom, "*:*", "*:*", DOC_SIZE/10, "id asc", "id")
            .collect(Collectors.toCollection(() -> new ArrayList<>()));
       int listSize = list.size();
       System.out.println("inside while:"+stopwatch);
